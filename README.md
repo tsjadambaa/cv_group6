@@ -1,2 +1,2 @@
-# group6
+# cv-group6
 Lab-6
