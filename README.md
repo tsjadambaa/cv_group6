@@ -35,11 +35,11 @@ img_op = cv2.Canny(img, 23, 74)
 
 Пример 1.
 
-<img src="Picture1.png" width="250"> | <img src="Picture1-1.png" width="250">
+<img src="assets/Picture1.png" width="250"> | <img src="assets/Picture1-1.png" width="250">
 
 Пример 2.
 
-<img src="Picture2.png" width="250"> | <img src="Picture2-1.png" width="250">
+<img src="assets/Picture2.png" width="250"> | <img src="assets/Picture2-1.png" width="250">
 
 Для дальнейшего улучшения метрики использовались морфологические операции
 Итоговая последовательность состоит из:
