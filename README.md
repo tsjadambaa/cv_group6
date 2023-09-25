@@ -71,3 +71,7 @@ dilated = cv2.dilate(close,kernel,iterations = 1)
 1. Скорость алгоритма в среде Google Collab - использовался серверный ускоритель Python 3 на базе Google Compute Engine(): оперативная память 12.7 Гб, диск 107.7 Гб. 
 составила **4.15 s/Mpx**
 2. Скорость алгоритма в среде Мас  - использовался  Python 3.11.5 на базе Аппле М1 про процессор: оперативная память 16 Гб, диск 500 Гб. составила **0.72 s/Mpx**
+
+Colab:
+
+Использовать данный <a name="ноутбук">https://colab.research.google.com/drive/1RYayQDRQRPseGXzsGuotu-l7zJeNR_MY?usp=sharing#scrollTo=Q6oVXw9NQlpv</a>
