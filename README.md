@@ -52,15 +52,15 @@ img_op = cv2.Canny(img, 23, 74)
 
 Код:
 ```python
-import cv2
-kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (17, 17))
+import cv2   
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (40, 26))
 close = cv2.morphologyEx(img_op, cv2.MORPH_CLOSE, kernel)
 
-kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (12, 13))
 close = cv2.morphologyEx(close, cv2.MORPH_CLOSE, kernel)
 
-
-close = cv2.dilate(close,kernel,iterations = 1)
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 9))
+dilated = cv2.dilate(close,kernel,iterations = 1)
 ```
 
 Такая последовательность была определена после экспериментов с различным набором операций и последовательностей их выполнения, а также значениями их параметров,
