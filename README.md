@@ -31,7 +31,7 @@
 
 
 Пример 1.
-
+![My animated logo](Picture1.png)
 
 Пример 2.
 
