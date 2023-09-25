@@ -72,5 +72,6 @@ dilated = cv2.dilate(close,kernel,iterations = 1)
 составила **4.15 s/Mpx**
 2. Скорость алгоритма в среде Мас  - использовался  Python 3.11.5 на базе Аппле М1 про процессор: оперативная память 16 Гб, диск 500 Гб. составила **0.72 s/Mpx**
 
-Colab:
+### Colab:
+
 Использовать данный <a href="https://colab.research.google.com/drive/1RYayQDRQRPseGXzsGuotu-l7zJeNR_MY?usp=sharing#scrollTo=Q6oVXw9NQlpv" target="_blank">ноутбук</a>
