@@ -74,4 +74,4 @@ dilated = cv2.dilate(close,kernel,iterations = 1)
 
 Colab:
 
-Использовать данный <a name="ноутбук">https://colab.research.google.com/drive/1RYayQDRQRPseGXzsGuotu-l7zJeNR_MY?usp=sharing#scrollTo=Q6oVXw9NQlpv</a>
+Использовать данный <a name="ноутбук"  href="https://colab.research.google.com/drive/1RYayQDRQRPseGXzsGuotu-l7zJeNR_MY?usp=sharing#scrollTo=Q6oVXw9NQlpv" target="_blank">ноутбук</a>
