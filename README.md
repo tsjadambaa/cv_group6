@@ -7,7 +7,7 @@
 3. Определены самые крайние точки по всем четырем направлениям, затем по ним - координаты левого верхнего и правого нижнего углов рамки;
 4. Выполнен расчет метрики.
 
-<b>Наилучшее значение метрик составило: 0,5656 </b>
+<b>Наилучшее значение метрики составило: 0,5656 </b>
 
 ## Подробный разбор шагов
 
@@ -42,12 +42,15 @@ matches = flann.knnMatch(input_desc, pattern_desc, k=2)
 
 <img src="assets/result_38.jpg" width="900"> 
 
-6. В качестве координат рамки берем ``(x1, y1) и (x2, y2)``, где ``x1`` - самая левая координата, ``y1`` - самая верняя, ``x2`` - самая правая и ``y2`` - самая нижняя соответсвенно.
+6. В качестве координат рамки берем ``(x1, y1) и (x2, y2)``, где ``x1`` - самая левая координата, ``y1`` - самая верхняя, ``x2`` - самая правая и ``y2`` - самая нижняя соответственно.
 ## Исходный код функции matchTemplate
 
 ```python
 
+# поиск по ключевым точкам, получить peak coord
+
 def matchTemplate(path_img, path_pattern):
+    
     input_image = cv2.imread(path_img, 0)
     pattern_template = cv2.imread(path_pattern, 0)
 
@@ -69,26 +72,25 @@ def matchTemplate(path_img, path_pattern):
     if not os.path.exists('./result'):
         os.mkdir('./result')
 
-    
     sift = cv2.SIFT_create()
     
     input_kp, input_desc = sift.detectAndCompute(input_image, None)
+    
     input_image_kp = cv2.drawKeypoints(input_image, input_kp, input_image)
     kp_input_name = 'key_points/input/kp_' + input_name + '.jpg'
     cv2.imwrite(kp_input_name, input_image_kp)
     
     pattern_kp, pattern_desc = sift.detectAndCompute(pattern_template,None)
+    
     pattern_image_kp = cv2.drawKeypoints(pattern_template, pattern_kp, pattern_template)
     kp_pattern_name = 'key_points/pattern/kp_' + pattern_name + '.jpg'
     cv2.imwrite(kp_pattern_name, pattern_image_kp)
 
     index_params = dict(algorithm=0, trees=5)
-    search_params = dict()
+    search_params = dict(checks=50)
+
     flann = cv2.FlannBasedMatcher(index_params, search_params)
     matches = flann.knnMatch(input_desc, pattern_desc, k=2)
-
-    points = []
-
 
     height, width =  input_image.shape
     
@@ -98,21 +100,27 @@ def matchTemplate(path_img, path_pattern):
     t = height
     
     ratio = 0.4
-    for i, j in matches:
-        if i.distance < ratio*j.distance:
-            points.append(i)
-            
-            img1_idx = i.queryIdx
-            
-            (x, y) = input_kp[img1_idx].pt
-            if x > r:
-                r = math.floor(x) + 1
-            if x < l:
-                l = math.floor(x)
-            if y < t:
-                t = math.floor(y)
-            if y > b:
-                b = math.floor(y) + 1
+    points = []
+
+    for i, pair in enumerate(matches):
+        try:
+            m, n = pair
+            if m.distance < ratio*n.distance:
+                points.append(m)
+                img1_idx = m.queryIdx
+                (x, y) = input_kp[img1_idx].pt
+                if x > r:
+                    r = math.floor(x) + 1
+                if x < l:
+                    l = math.floor(x)
+                if y < t:
+                    t = math.floor(y)
+                if y > b:
+                    b = math.floor(y) + 1            
+
+        except ValueError:
+            pass
+    
         
     result = cv2.drawMatches(input_image, input_kp, pattern_template, pattern_kp, points, None)
     cv2.imwrite('result/' + 'result_' + input_name + '.jpg', result)
@@ -126,7 +134,7 @@ def matchTemplate(path_img, path_pattern):
 
 ## Результаты
 В процессе выполнения работы были сравнены различные алгоритмы детекции ключевых точек, а также их гиперпараметры. Представленные параметры были отмечены, как дающие наилучшие значения метрики: <b>0,5656</b>. 
-Несмотря на то, что детекция ключевых точек алгоритмом ORB по скорости значительно опережает алгоритм SIFT, наилучшая метрика полученная с помощью ORB равна <b>0,1177</b>. При этом были использованы следующие параметры:
+Несмотря на то, что детекция ключевых точек алгоритмом ORB по скорости значительно опережает алгоритм SIFT, метрика полученная с помощью ORB равна <b>0,1177</b>, при этом для сравнения ключевых точек использовался ```FlannBasedMatcher```, при сравнении похожести точек использовался коэффициент ```ratio = 0,4```, такой же как и в случае со SIFT. При этом были использованы следующие параметры:
 
 ```python
 
@@ -138,4 +146,4 @@ index_params= dict(algorithm = FLANN_INDEX_LSH,
    search_params = dict(checks=50)
 ```
 
-для сравнения ключевых точек также использовался ```FlannBasedMatcher```, при сравнении похожести точек использовался коэффициент ```ratio = 0,4```, такой же как и в случае со SIFT. При использовании ```ratio = 0,6``` точность повысилась до <b>0.1226</b>, однако время работы многократно возросло и превысило даже время у SIFT, несмотря на незначительный прирост значения метрики. Таким образом точность алгоритма SIFT на данном датасете оказалась приближительно в 5 раз выше, чем у ORB, хотя значение времени выполнения также выше у SIFT.
+При использовании ```ratio = 0,6``` точность повысилась до <b>0.1226</b>, однако время работы многократно возросло и превысило даже время у SIFT, несмотря на незначительный прирост значения метрики. Таким образом точность алгоритма SIFT на данном датасете оказалась приближительно в 5 раз выше, чем у ORB, хотя значение времени выполнения также выше у SIFT.
