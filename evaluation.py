@@ -36,6 +36,7 @@ def get_metrics(enh_img: torch.Tensor, gt_img: torch.Tensor, device: str = 'gpu'
     # LILPS
     lpips = LPIPS('alex').to(device)
     lpips_score = lpips(enh_img, gt_img).item()
+    del psnr, ms_ssim, lpips
     return psnr_score, ssim_score, lpips_score
 
 
@@ -46,28 +47,34 @@ def evaluate(model_name, dataloader, device='cpu'):
     ssim_list = np.array([])
     lpips_list = np.array([])
     times = np.array([])
-
+    print(device)
     print(model_name)
 
     DCE_net = model.enhance_net_nopool().cuda()
     DCE_net.load_state_dict(torch.load(model_name))
+    DCE_net.training = False
 
-    for lowlight_img, gt_img in tqdm(dataloader):
-        # Улучшение качества изображения
-        start = time.time()
-        img_lowlight = lowlight_img.cuda()
-        _, enhanced_image, _ = DCE_net(img_lowlight)
-        np.append(times, time.time() - start)
-        ################################
+    pbar = tqdm(total=len(dataloader))
+    with torch.no_grad():
+        for lowlight_img, gt_img in dataloader:
+            # Улучшение качества изображения
+            start = time.time()
+            img_lowlight = lowlight_img.cuda()
+            _, enhanced_image, _ = DCE_net(img_lowlight)
+            times = np.append(times, time.time() - start)
+            ################################
 
-        psnr_score, ssim_score, lpips_score = get_metrics(enhanced_image, gt_img, device=device)
+            psnr_score, ssim_score, lpips_score = get_metrics(enhanced_image, gt_img, device=device)
 
-        psnr_list = np.append(psnr_list, psnr_score)
-        ssim_list = np.append(ssim_list, ssim_score)
-        lpips_list = np.append(lpips_list, lpips_score)
+            psnr_list = np.append(psnr_list, psnr_score)
+            ssim_list = np.append(ssim_list, ssim_score)
+            lpips_list = np.append(lpips_list, lpips_score)
+            del lowlight_img, enhanced_image, gt_img
+            pbar.update(1)
 
-    print(f'PSNR: {psnr_list.mean()}\nSSIM: {ssim_list.mean()}\nLPIPS: {lpips_list.mean()}')
-    print(times.mean())
+    print(f'PSNR: {np.ma.masked_invalid(psnr_list).mean()}\nSSIM: {ssim_list.mean()}\nLPIPS: {lpips_list.mean()}')
+    print(f"Среднее время на изображение: {times.mean()}")
+
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -77,16 +84,15 @@ def weights_init(m):
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
 
+
 def img_show(*images):
     fig, axs = plt.subplots(1, len(images), figsize=(5, 6))
     for ax, img in zip(axs, images):
         ax.imshow(img)
     plt.show()
-def train(loader, snapshots_folder):
-    lr = 0.0001
-    weight_decay = 0.0001
-    epochs = 200
 
+
+def train(loader, snapshots_folder, lr, weight_decay, epochs):
     DCE_net = model.enhance_net_nopool().cuda()
 
     DCE_net.apply(weights_init)
@@ -142,7 +148,11 @@ if __name__ == "__main__":
     if not os.path.exists(snapshots_folder):
         os.mkdir(snapshots_folder)
 
-    batch_size = 8
+    batch_size = 14
+    lr = 0.0001
+    weight_decay = 0.0001
+    epochs = 200
+    print(F"Batch size: {batch_size}, lr: {lr}, weight_decay: {weight_decay}, epochs: {epochs}")
 
     img_names = os.listdir('dataset/low')
     dataset = lowlight_dataset(img_names, 'dataset')
@@ -150,6 +160,6 @@ if __name__ == "__main__":
     test_ds, valid_ds = torch.utils.data.random_split(dataset, (0.8, 0.2), generator=generator)
     test_dl = DataLoader(test_ds.dataset, batch_size=batch_size, num_workers=4)
     valid_dl = DataLoader(valid_ds.dataset, batch_size=batch_size, num_workers=4)
-    # model_name = train(test_dl, snapshots_folder=snapshots_folder)
-    model_name = snapshots_folder+ "Epoch37.pth"
-    evaluate(model_name, valid_dl)
+    model_name = train(test_dl, snapshots_folder=snapshots_folder, lr=lr, weight_decay=weight_decay, epochs=epochs)
+    model_name = snapshots_folder + "Epoch37.pth"
+    evaluate(model_name, valid_dl, device=device)

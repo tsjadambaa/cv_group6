@@ -19,11 +19,13 @@ class lowlight_dataset(torch.utils.data.Dataset):
 
         data_lowlight = (np.asarray(data_lowlight) / 255.0)
         data_lowlight = torch.from_numpy(data_lowlight).float()
+        data_lowlight = data_lowlight.permute(2, 0, 1).cuda()
 
         data_highlight = (np.asarray(data_highlight) / 255.0)
         data_highlight = torch.from_numpy(data_highlight).float()
+        data_highlight = data_highlight.permute(2, 0, 1).cuda()
 
-        return data_lowlight.permute(2, 0, 1), data_highlight.permute(2, 0, 1)
+        return data_lowlight, data_highlight
 
     def __len__(self):
         return len(self.image_name_list)
