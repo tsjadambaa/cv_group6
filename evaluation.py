@@ -47,14 +47,13 @@ def evaluate(model_name, dataloader, device='cpu'):
     ssim_list = np.array([])
     lpips_list = np.array([])
     times = np.array([])
-    print(device)
-    print(model_name)
+    print(f"Evaluation model: {model_name}")
 
     DCE_net = model.enhance_net_nopool().cuda()
     DCE_net.load_state_dict(torch.load(model_name))
     DCE_net.training = False
 
-    pbar = tqdm(total=len(dataloader))
+    pbar = tqdm(total=len(dataloader), desc="Test: ")
     with torch.no_grad():
         for lowlight_img, gt_img in dataloader:
             # Улучшение качества изображения
@@ -73,7 +72,7 @@ def evaluate(model_name, dataloader, device='cpu'):
             pbar.update(1)
 
     print(f'PSNR: {np.ma.masked_invalid(psnr_list).mean()}\nSSIM: {ssim_list.mean()}\nLPIPS: {lpips_list.mean()}')
-    print(f"Среднее время на изображение: {times.mean()}")
+    print(f"Mean time: {times.mean()}")
 
 
 def weights_init(m):
@@ -108,6 +107,7 @@ def train(loader, snapshots_folder, lr, weight_decay, epochs):
     DCE_net.train()
     last_model_name = ""
 
+    pbar = tqdm(total=epochs, desc="Train")
     for epoch in range(epochs):
         for iteration, img in enumerate(loader):
             img_lowlight, img_highlight = img
@@ -127,15 +127,16 @@ def train(loader, snapshots_folder, lr, weight_decay, epochs):
 
             optimizer.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm(DCE_net.parameters(), 0.1)
+            torch.nn.utils.clip_grad_norm_(DCE_net.parameters(), 0.1)
             optimizer.step()
 
             if ((iteration + 1) % 10) == 0:
-                print("Loss at iteration", iteration + 1, ":", loss.item())
+                # print("Loss at iteration", iteration + 1, ":", loss.item())
+                pbar.set_postfix({"loss": f"{loss.item()}"})
 
-            if ((iteration + 1) % 10) == 0:
-                last_model_name = snapshots_folder + "Epoch" + str(epoch) + '.pth'
-                torch.save(DCE_net.state_dict(), last_model_name)
+        last_model_name = snapshots_folder + "Epoch" + str(epoch) + '.pth'
+        torch.save(DCE_net.state_dict(), last_model_name)
+        pbar.update(1)
     return last_model_name
 
 
@@ -151,15 +152,16 @@ if __name__ == "__main__":
     batch_size = 14
     lr = 0.0001
     weight_decay = 0.0001
-    epochs = 200
-    print(F"Batch size: {batch_size}, lr: {lr}, weight_decay: {weight_decay}, epochs: {epochs}")
+    epochs = 50
+    num_workers = 4
+    print(F"batch size: {batch_size}, lr: {lr}, weight_decay: {weight_decay}, epochs: {epochs}")
 
     img_names = os.listdir('dataset/low')
     dataset = lowlight_dataset(img_names, 'dataset')
     generator = torch.Generator().manual_seed(42)
     test_ds, valid_ds = torch.utils.data.random_split(dataset, (0.8, 0.2), generator=generator)
-    test_dl = DataLoader(test_ds.dataset, batch_size=batch_size, num_workers=4)
-    valid_dl = DataLoader(valid_ds.dataset, batch_size=batch_size, num_workers=4)
+    test_dl = DataLoader(test_ds.dataset, batch_size=batch_size, num_workers=num_workers)
+    valid_dl = DataLoader(valid_ds.dataset, batch_size=batch_size, num_workers=num_workers)
     model_name = train(test_dl, snapshots_folder=snapshots_folder, lr=lr, weight_decay=weight_decay, epochs=epochs)
-    model_name = snapshots_folder + "Epoch37.pth"
+    # model_name = snapshots_folder + "Epoch37.pth"
     evaluate(model_name, valid_dl, device=device)
