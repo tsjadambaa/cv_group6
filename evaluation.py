@@ -52,6 +52,7 @@ def evaluate(model_name, dataloader, device='cpu'):
     DCE_net = model.enhance_net_nopool().cuda()
     DCE_net.load_state_dict(torch.load(model_name))
     DCE_net.training = False
+    # print(DCE_net)
 
     pbar = tqdm(total=len(dataloader), desc="Test: ")
     with torch.no_grad():
@@ -91,10 +92,13 @@ def img_show(*images):
     plt.show()
 
 
-def train(loader, snapshots_folder, lr, weight_decay, epochs):
+def train(loader, snapshots_folder, lr, weight_decay, epochs, model_name=None):
     DCE_net = model.enhance_net_nopool().cuda()
+    if model_name:
+        DCE_net.load_state_dict(torch.load(model_name))
+    else:
+        DCE_net.apply(weights_init)
 
-    DCE_net.apply(weights_init)
 
     L_color = utils.L_color()
     L_spa = utils.L_spa()
@@ -149,19 +153,32 @@ if __name__ == "__main__":
     if not os.path.exists(snapshots_folder):
         os.mkdir(snapshots_folder)
 
-    batch_size = 14
+    batch_size = 20
     lr = 0.0001
     weight_decay = 0.0001
-    epochs = 50
+    epochs = 100
     num_workers = 4
     print(F"batch size: {batch_size}, lr: {lr}, weight_decay: {weight_decay}, epochs: {epochs}")
 
     img_names = os.listdir('dataset/low')
     dataset = lowlight_dataset(img_names, 'dataset')
+
+    img_names = os.listdir('test_dataset/low')
+    test_dataset = lowlight_dataset(img_names, 'dataset')
+    test_dl = DataLoader(test_dataset, batch_size=batch_size, num_workers=num_workers)
+
     generator = torch.Generator().manual_seed(42)
-    test_ds, valid_ds = torch.utils.data.random_split(dataset, (0.8, 0.2), generator=generator)
-    test_dl = DataLoader(test_ds.dataset, batch_size=batch_size, num_workers=num_workers)
+    train_ds, valid_ds = torch.utils.data.random_split(dataset, (0.8, 0.2), generator=generator)
+    train_dl = DataLoader(train_ds.dataset, batch_size=batch_size, num_workers=num_workers)
     valid_dl = DataLoader(valid_ds.dataset, batch_size=batch_size, num_workers=num_workers)
-    model_name = train(test_dl, snapshots_folder=snapshots_folder, lr=lr, weight_decay=weight_decay, epochs=epochs)
-    # model_name = snapshots_folder + "Epoch37.pth"
+    # model_name = train(train_dl, snapshots_folder=snapshots_folder, lr=lr, weight_decay=weight_decay, epochs=epochs, model_name=snapshots_folder + "Epoch49.pth")
+
+    model_name = snapshots_folder + "Epoch49.pth"
+
+    print()
+    print("Valid dataset")
     evaluate(model_name, valid_dl, device=device)
+
+    print()
+    print("Test dataset")
+    evaluate(model_name, test_dl, device=device)
