@@ -102,9 +102,20 @@ def unet_model(image_size, output_classes):
 
 
     #Выходной слой
-    output_layer = tf.keras.layers.Conv2DTranspose(output_classes, 4, activation='sigmoid', strides=2,
+    output_layer = tf.keras.layers.Conv2DTranspose(output_classes, 4,
+                                                   activation='sigmoid',
+                                                   strides=2,
                                                    padding='same',
                                                    kernel_initializer='glorot_normal')(batch_up_6)
 
     model = tf.keras.Model(inputs=input_layer, outputs=output_layer)
     return model
+
+if __name__=="__main__":
+    BATCH_SIZE = 16
+    IMG_SHAPE = (256, 256)
+    CLASSES = 8
+    model = unet_model(IMG_SHAPE, CLASSES)
+
+    tf.keras.utils.plot_model(model, show_shapes=True)
+    # model.summary()

@@ -90,8 +90,14 @@ def dice_bce_loss(y_pred, y_true, classes=1):
     return total_loss
 
 
-def img_show(*images):
-    fig, axs = plt.subplots(1, len(images), figsize=(5, 6))
-    for ax, img in zip(axs, images):
-        ax.imshow(img)
-    plt.show()
+def img_show(*images, **kwargs):
+    title = None
+    if kwargs.get("titles", False):
+        title = kwargs.pop("titles")
+
+    fig, axs = plt.subplots(1, len(images), figsize=(18, 5))
+    for idx, el in enumerate(zip(axs, images)):
+        ax, img = el
+        ax.imshow(img, **kwargs)
+        if title:
+            ax.set_title(title[idx])
