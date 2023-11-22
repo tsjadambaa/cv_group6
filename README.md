@@ -1,12 +1,13 @@
 # Решение
 ## Описание задачи
 * Задача - сегментация изображений с определением класса выделенной области.
+Полное описание представлено в файле [task.md](task.md)
 
 ## Метрики
 Метрики оценки качества сегментации:  
 IoU:  
 ![image](https://github.com/compfee/CV_2023_lab5/assets/55783463/b78b3cdc-4b02-48dd-a474-c8ec7845f5d2)  
-​Per-class IoU:  
+Per-class IoU:  
 IoU по каждому из 8 классов  
 Per-pixel accuracy:  
 ![image](https://github.com/compfee/CV_2023_lab5/assets/55783463/4093f270-9ca5-4fc8-a7de-10c93e1c44dd)  
@@ -22,9 +23,22 @@ Per-pixel accuracy:
 * Также для исключения переобучения и повышения производительности сети использовались слои Dropout и BatchNorm.
 * Тренировочная и тестовая выборки составляют 80% и 20% от исходного набора.
 
+## Сравнение результатов работы
+Пример 1:
+![img.png](assets/img.png)
+Пример 2:
+![img_1.png](assets/img_1.png)
+Пример 3:
+![img.png](assets/img_2.png)
 
-# Структура сети
-```
+
+## Значения метрик
+| IoU | Per-class IoU | Per-pixel accuracy |
+|-----|---------------|--------------------|
+| 0   | 0             | 0                  |
+
+## Структура сети
+```python
 def unet_model(image_size, output_classes):
     input_layer = tf.keras.layers.Input(shape=image_size + (3,))
     conv_1 = tf.keras.layers.Conv2D(64, 4, activation=tf.keras.layers.LeakyReLU(),
