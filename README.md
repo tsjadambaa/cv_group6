@@ -32,9 +32,14 @@ opt_dis = tf.train.RMSPropOptimizer(0.001)
 Пример 4:
 ![img4.png](assets/img4.png)
 Пример 5:
-![img6.png](assets/img6.png)
+![img5.png](assets/img5.png)
 Пример 6:
+![img6.png](assets/img6.png)
+Пример 7:
 ![img7.png](assets/img7.png)
+Пример 8:
+![img8.png](assets/img8.png)
+
 
 
 ## Структура сети
