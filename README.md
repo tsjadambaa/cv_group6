@@ -111,23 +111,8 @@ discrim = Model([img, lbl], [d, l], name='Discriminator')
 ```
 ## Результаты генерации картинок нужного лейбла из шума
 
-Пример 1:
-![img9.png](assets/img9.png)
-Пример 2:
-![img10.png](assets/img10.png)
-Пример 3:
-![img11.png](assets/img11.png)
-Пример 4:
-![img12.png](assets/img12.png)
-Пример 5:
-![img13.png](assets/img13.png)
-Пример 6:
-![img14.png](assets/img14.png)
-Пример 7:
-![img15.png](assets/img15.png)
-Пример 8:
-![img16.png](assets/img16.png)
-Пример 9:
-![img17.png](assets/img17.png)
-Пример 10:
+
+![img9.png](assets/img9.png) ![img10.png](assets/img10.png) ![img11.png](assets/img11.png)
+![img12.png](assets/img12.png) ![img13.png](assets/img13.png) ![img14.png](assets/img14.png)
+![img15.png](assets/img15.png) ![img16.png](assets/img16.png) ![img17.png](assets/img17.png)
 ![img18.png](assets/img18.png)
