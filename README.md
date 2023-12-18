@@ -17,11 +17,17 @@
 
 ## Сравнение результатов на тестовых данных в процессе обучения
 Пример 1:
-![img.png](assets/img.png)
+![img1.png](assets/img1.png)
 Пример 2:
-![img_1.png](assets/img_1.png)
+![img2.png](assets/img2.png)
 Пример 3:
-![img.png](assets/img_2.png)
+![img3.png](assets/img3.png)
+Пример 4:
+![img4.png](assets/img4.png)
+Пример 5:
+![img6.png](assets/img6.png)
+Пример 6:
+![img7.png](assets/img7.png)
 
 
 ## Структура сети
