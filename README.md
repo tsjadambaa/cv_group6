@@ -15,7 +15,7 @@
 Также, поскольку для модели VAE+GAN зачастую характерно неравномерное обучение, было выбрано разное количество шагов для VAE и дискриминатора. Так, на 1 шаг обучения дискриминатора приходилось 4 шага обучения для VAE, поскольку в противном случае дискриминатор быстро начинал переобучаться.
 
 
-## Сравнение результатов работы
+## Сравнение результатов на тестовых данных в процессе обучения
 Пример 1:
 ![img.png](assets/img.png)
 Пример 2:
@@ -25,7 +25,7 @@
 
 
 ## Структура сети
-# Энкодер
+### Энкодер
 ```python
 x = Conv2D(32, kernel_size=(3, 3), strides=(2, 2), padding='same')(img)
 x = LeakyReLU()(x)
@@ -51,7 +51,7 @@ l = Lambda(sampling, output_shape=(latent_dim,))([z_mean, z_log_var])
 encoder = Model([img, lbl], [z_mean, z_log_var, l], name='Encoder')
 ```
 
-# Декодер
+### Декодер
 ```python
 x = concatenate([z, lbl])
 x = Dense(7*7*128)(x)
@@ -70,7 +70,7 @@ decoded = Conv2D(1, kernel_size=(5, 5), activation='sigmoid', padding='same')(x)
 decoder = Model([z, lbl], decoded, name='Decoder')
 ```
 
-# Дискриминатор
+### Дискриминатор
 ```python
 x = Conv2D(128, kernel_size=(7, 7), strides=(2, 2), padding='same')(img)
 x = MaxPool2D((2, 2), padding='same')(x)
